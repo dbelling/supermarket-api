@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
 	"github.com/gorilla/mux"
 )
 
@@ -16,14 +17,15 @@ type Food struct {
 
 var Produce []Food
 
-func showProduce(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("GET /produce: showProduce")
+func ShowFoods(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("GET /foods: showProduce")
 	json.NewEncoder(w).Encode(Produce)
 }
 
 func requestHandler() {
-	http.HandleFunc("/produce", showProduce)
-	log.Fatal(http.ListenAndServe(":9000", nil))
+	produceRouter := mux.NewRouter().StrictSlash(true)
+	produceRouter.HandleFunc("/foods", ShowFoods)
+	log.Fatal(http.ListenAndServe(":9000", produceRouter))
 }
 
 func main() {
