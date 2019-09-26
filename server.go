@@ -18,8 +18,34 @@ type Food struct {
 var Produce []Food
 
 func ShowFoods(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("GET /foods: showProduce")
+	fmt.Println("GET /food: showFoods")
 	json.NewEncoder(w).Encode(Produce)
+}
+
+func ShowFood(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("GET /food/{code}: showFood")
+	handlerChannel := make(chan Food)
+
+	go func() {
+		vars := mux.Vars(r)
+		code := vars["code"]
+		var foundFood Food
+		for index, food := range Produce {
+			if food.Code == code {
+				foundFood = Produce[index]
+				break
+			}
+		}
+		handlerChannel <- foundFood
+	}()
+
+	foundFood := <-handlerChannel
+	if foundFood.Code != "" {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	json.NewEncoder(w).Encode(foundFood)
 }
 
 func DeleteFood(w http.ResponseWriter, r *http.Request) {
@@ -34,6 +60,7 @@ func DeleteFood(w http.ResponseWriter, r *http.Request) {
 			if food.Code == code {
 				Produce = append(Produce[:index], Produce[index+1:]...)
 				deletedFood = true
+				break
 			}
 		}
 		handlerChannel <- deletedFood
@@ -49,7 +76,8 @@ func DeleteFood(w http.ResponseWriter, r *http.Request) {
 
 func requestHandler() {
 	produceRouter := mux.NewRouter().StrictSlash(true)
-	produceRouter.HandleFunc("/foods", ShowFoods)
+	produceRouter.HandleFunc("/food/{code}", ShowFood)
+	produceRouter.HandleFunc("/food", ShowFoods)
 	produceRouter.HandleFunc("/food/{code}", DeleteFood).Methods("DELETE")
 	log.Fatal(http.ListenAndServe(":9000", produceRouter))
 }
