@@ -24,19 +24,23 @@ func ShowFoods(w http.ResponseWriter, r *http.Request) {
 
 func DeleteFood(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("DELETE /food: DeleteFood")
+	handlerChannel := make(chan bool)
 
-	vars := mux.Vars(r)
-	code := vars["code"]
-
-	var deletedFood bool = false
-	for index, food := range Produce {
-		if food.Code == code {
-			Produce = append(Produce[:index], Produce[index+1:]...)
-			deletedFood = true
+	go func() {
+		vars := mux.Vars(r)
+		code := vars["code"]
+		var deletedFood bool = false
+		for index, food := range Produce {
+			if food.Code == code {
+				Produce = append(Produce[:index], Produce[index+1:]...)
+				deletedFood = true
+			}
 		}
-	}
+		handlerChannel <- deletedFood
+	}()
 
-	if deletedFood {
+	foodDeleted := <-handlerChannel
+	if foodDeleted {
 		w.WriteHeader(http.StatusNoContent)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
