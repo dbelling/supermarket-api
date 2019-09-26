@@ -22,9 +22,31 @@ func ShowFoods(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(Produce)
 }
 
+func DeleteFood(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("DELETE /food: DeleteFood")
+
+	vars := mux.Vars(r)
+	code := vars["code"]
+
+	var deletedFood bool = false
+	for index, food := range Produce {
+		if food.Code == code {
+			Produce = append(Produce[:index], Produce[index+1:]...)
+			deletedFood = true
+		}
+	}
+
+	if deletedFood {
+		w.WriteHeader(http.StatusNoContent)
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+	}
+}
+
 func requestHandler() {
 	produceRouter := mux.NewRouter().StrictSlash(true)
 	produceRouter.HandleFunc("/foods", ShowFoods)
+	produceRouter.HandleFunc("/food/{code}", DeleteFood).Methods("DELETE")
 	log.Fatal(http.ListenAndServe(":9000", produceRouter))
 }
 

@@ -21,3 +21,19 @@ func TestShowFoods(t *testing.T) {
 			status, http.StatusOK)
 	}
 }
+
+func TestDeleteFood(t *testing.T) {
+	req, err := http.NewRequest("DELETE", "/food/123-ABC", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(DeleteFood)
+	handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusNotFound {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusNotFound)
+	}
+}
