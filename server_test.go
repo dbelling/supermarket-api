@@ -56,7 +56,7 @@ func TestDeleteFood(t *testing.T) {
 }
 
 func TestCreateFood(t *testing.T) {
-	var foodPayload = []byte(`{"ProduceCode":"ABCD-1234-DEFG-5678","Name":"Cucumber","UnitPrice":1.99}`)
+	var foodPayload = []byte(`{"ProduceCode":"ABCD-1234-DEFG-5678","Name":"Cucumber","UnitPrice":"1.99"}`)
 
 	req, err := http.NewRequest("POST", "/foods", bytes.NewBuffer(foodPayload))
 	if err != nil {
@@ -71,17 +71,17 @@ func TestCreateFood(t *testing.T) {
 			status, http.StatusCreated)
 	}
 
-	var m map[string]interface{}
+	var m []Food
 	json.Unmarshal(rr.Body.Bytes(), &m)
-	if m["ProduceCode"] != "ABCD-1234-DEFG-5678" {
-		t.Errorf("Expected ProduceCode to be 'ABCD-1234-DEFG-5678'. Got '%v'", m["ProduceCode"])
+	if m[0].ProduceCode != "ABCD-1234-DEFG-5678" {
+		t.Errorf("Expected ProduceCode to be 'ABCD-1234-DEFG-5678'. Got '%v'", m[0].ProduceCode)
 	}
-	if m["Name"] != "Cucumber" {
-		t.Errorf("Expected Name to be 'Cucumber'. Got '%v'", m["Name"])
+	if m[0].Name != "Cucumber" {
+		t.Errorf("Expected Name to be 'Cucumber'. Got '%v'", m[0].Name)
 	}
 	// the id is compared to 1.0 because JSON unmarshaling converts numbers to
 	// floats, when the target is a map[string]interface{}
-	if m["UnitPrice"] != 1.99 {
-		t.Errorf("Expected Price to be '1.99'. Got '%v'", m["UnitPrice"])
+	if m[0].UnitPrice != "1.99" {
+		t.Errorf("Expected Price to be '1.99'. Got '%v'", m[0].UnitPrice)
 	}
 }
