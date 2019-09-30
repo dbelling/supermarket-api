@@ -9,3 +9,8 @@ go:
 script:
   - go fmt
   - go test
+  - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server .
+  - docker build -t danbelling/supermarket-api .
+
+after_success:
+  - ./publish.sh
