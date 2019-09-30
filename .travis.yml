@@ -14,3 +14,9 @@ script:
 
 after_success:
   - ./publish.sh
+
+notifications:
+  email:
+    recipients:
+      - danhbelling@gmail.com
+    on_success: always
