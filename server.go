@@ -69,6 +69,10 @@ func (f Food) Validate(r *http.Request) error {
 		return ErrInvalidName
 	}
 
+	if !govalidator.IsAlphanumeric(f.Name) {
+		return ErrInvalidName
+	}
+
 	if !govalidator.IsFloat(f.UnitPrice) {
 		return ErrInvalidUnitPrice
 	}
@@ -136,7 +140,6 @@ func CreateFood(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
-			foodsToCreate = append(foodsToCreate, food)
 		}
 	} else {
 		var createdFood Food
@@ -165,7 +168,7 @@ func CreateFood(w http.ResponseWriter, r *http.Request) {
 
 // DeleteFood : Delete controller method to delete a food by ProduceCode
 func DeleteFood(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("DELETE /food: DeleteFood")
+	fmt.Println("DELETE /food{code}: DeleteFood")
 	handlerChannel := make(chan bool)
 
 	go func() {
@@ -195,7 +198,7 @@ func requestHandler() {
 	produceRouter.HandleFunc("/food/{code}", ShowFood)
 	produceRouter.HandleFunc("/food", ShowFoods)
 	produceRouter.HandleFunc("/foods", CreateFood).Methods("POST")
-	produceRouter.HandleFunc("/food/{code}", DeleteFood).Methods("DELETE")
+	produceRouter.HandleFunc("/foods/{code}", DeleteFood).Methods("DELETE")
 	log.Fatal(http.ListenAndServe(":9000", produceRouter))
 }
 

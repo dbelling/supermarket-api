@@ -40,7 +40,7 @@ func TestShowFood(t *testing.T) {
 }
 
 func TestDeleteFood(t *testing.T) {
-	req, err := http.NewRequest("DELETE", "/food/123-ABC", nil)
+	req, err := http.NewRequest("DELETE", "/foods/123-ABC", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
