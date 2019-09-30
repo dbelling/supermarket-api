@@ -14,23 +14,33 @@ import (
 )
 
 var (
+	// ErrInvalidProduceCode : Description about this
 	ErrInvalidProduceCode = errors.New("invalid produce code")
-	ErrInvalidName        = errors.New("invalid name")
-	ErrInvalidUnitPrice   = errors.New("invalid unit price")
+	// ErrInvalidName : Description about this
+	ErrInvalidName = errors.New("invalid name")
+	// ErrInvalidUnitPrice : Description about this
+	ErrInvalidUnitPrice = errors.New("invalid unit price")
 )
 
+// Food : The Food in our Supermarket
 type Food struct {
 	ProduceCode string
 	Name        string
 	UnitPrice   string
 }
 
+// FoodValidation : Validation interface for required fields on Food
 type FoodValidation interface {
 	Validate(r *http.Request) error
 }
 
+// Produce : In memory array of food in our Supermarket
 var Produce []Food
 
+// Validate : Validation function to ensure that all Food in our supermarket is valid
+// Name - Alphanumeric and case insensitive
+// ProduceCode - Sixteen characters long, with dashes separating each four character group
+// UnitPrice - Number with up to 2 decimal places
 func (f Food) Validate(r *http.Request) error {
 
 	if len(f.ProduceCode) != 19 {
@@ -66,15 +76,18 @@ func (f Food) Validate(r *http.Request) error {
 	return nil
 }
 
+// Validate : Food validation interface method
 func Validate(r *http.Request, v FoodValidation) error {
 	return v.Validate(r)
 }
 
+// ShowFoods : Index controller method to display all foods
 func ShowFoods(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("GET /food: showFoods")
 	json.NewEncoder(w).Encode(Produce)
 }
 
+// ShowFood : Show controller method to display a particular food by ProduceCode
 func ShowFood(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("GET /food/{code}: showFood")
 	handlerChannel := make(chan Food)
@@ -101,6 +114,7 @@ func ShowFood(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(foundFood)
 }
 
+// CreateFood : Create controller method to create a new food (or multiple foods) in the database
 func CreateFood(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("POST /food: CreateFood")
 
@@ -135,7 +149,6 @@ func CreateFood(w http.ResponseWriter, r *http.Request) {
 		foodsToCreate = append(foodsToCreate, createdFood)
 	}
 
-
 	handlerChannel := make(chan []Food)
 	go func(foods []Food) {
 		for _, food := range foods {
@@ -150,6 +163,7 @@ func CreateFood(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(foodCreated)
 }
 
+// DeleteFood : Delete controller method to delete a food by ProduceCode
 func DeleteFood(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("DELETE /food: DeleteFood")
 	handlerChannel := make(chan bool)
